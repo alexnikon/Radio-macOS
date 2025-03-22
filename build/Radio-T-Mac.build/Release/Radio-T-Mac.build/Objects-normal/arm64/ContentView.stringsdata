@@ -1,0 +1,40 @@
+{
+  "source": "/Users/alex/Developer/Radio-T-Mac/Radio-T-Mac/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Stream",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Now Playing",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "Новости",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 161
+        }
+      },
+      {
+        "comment": "",
+        "key": "Чат",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 171
+        }
+      }
+    ]
+  },
+  "version": 1
+}

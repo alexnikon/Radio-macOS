@@ -1,0 +1,10 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "d7cf4d3dcea95ed5aed4bac83b9ed4d8426c431d81b9d5f14f6c4c8aaf39c973"
+build_start_time: [1742574989, 696192000]
+build_end_time: [1742574994, 350822000]
+inputs:
+  "/Users/alex/Developer/Radio-T-Mac/Radio-T-Mac/AudioPlayerManager.swift": [1742574977, 358053302]
+  "/Users/alex/Developer/Radio-T-Mac/Radio-T-Mac/ContentView.swift": [1742574965, 462575517]
+  "/Users/alex/Developer/Radio-T-Mac/Radio-T-Mac/NotificationManager.swift": [1742574140, 889199770]
+  "/Users/alex/Developer/Radio-T-Mac/Radio-T-Mac/Radio.swift": [1742574691, 143520032]
+  "/Users/alex/Developer/Radio-T-Mac/build/Radio-T-Mac.build/Release/Radio-T-Mac.build/DerivedSources/GeneratedAssetSymbols.swift": [1742574989, 591071029]
