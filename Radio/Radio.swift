@@ -1,10 +1,3 @@
-//
-//  Radio.swift
-//  Radio
-//
-//  Created by Alex Nikon on 16.03.2025.
-//
-
 import SwiftUI
 import AppKit
 

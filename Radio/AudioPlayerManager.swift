@@ -1,10 +1,3 @@
-//
-//  AudioPlayerManager.swift
-//  Radio
-//
-//  Created by Alex Nikon on 16.03.2025.
-//
-
 import AVFoundation
 import Combine
 import MediaPlayer
@@ -232,7 +225,7 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
                 // Настройка метаданных
                 let metadataOutput = AVPlayerItemMetadataOutput(identifiers: nil)
                 metadataOutput.setDelegate(self, queue: DispatchQueue.main)
-                await playerItem.add(metadataOutput) // Убираем try, так как метод не выбрасывает исключений
+                playerItem.add(metadataOutput) // Метод синхронный на macOS
                 self.metadataOutput = metadataOutput
                 
                 // Создание плеера
