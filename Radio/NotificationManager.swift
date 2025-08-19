@@ -29,7 +29,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate, Observabl
             }
             
             if granted {
-                self.scheduleWeeklyNotification()
+                self.scheduleWeeklyNotifications()
             }
             if let error {
                 print("Notification authorization error: \(error)")
@@ -37,27 +37,51 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate, Observabl
         }
     }
     
-    func scheduleWeeklyNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Radio"
-        content.body = "Прямой эфир!"
-        content.sound = .default
-        content.interruptionLevel = .timeSensitive // Функция для macOS 15
+    func scheduleWeeklyNotifications() {
+        let center = UNUserNotificationCenter.current()
+        let preliveId = "radio-t-prelive-2245"
+        let liveId = "radio-t-live-2300"
         
-        // Создаем компоненты даты для субботы, 23:00 МСК
-        var dateComponents = DateComponents()
-        dateComponents.weekday = 7 // Суббота (1 = воскресенье, 7 = суббота)
-        dateComponents.hour = 23
-        dateComponents.minute = 0
-        dateComponents.timeZone = TimeZone(identifier: "Europe/Moscow")
+        // Обновляем существующие запросы, чтобы избежать дубликатов
+        center.removePendingNotificationRequests(withIdentifiers: [preliveId, liveId])
         
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "radio-t-live", content: content, trigger: trigger)
+        // 1) 22:45 — за 15 минут до эфира
+        let preliveContent = UNMutableNotificationContent()
+        preliveContent.title = "Radio"
+        preliveContent.body = "Трансляция начнется через 15 минут"
+        preliveContent.sound = .default
+        preliveContent.interruptionLevel = .timeSensitive
         
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("Error scheduling notification: \(error)")
-            }
+        var preliveComponents = DateComponents()
+        preliveComponents.weekday = 7 // Суббота (1 = воскресенье, 7 = суббота)
+        preliveComponents.hour = 22
+        preliveComponents.minute = 45
+        preliveComponents.timeZone = TimeZone(identifier: "Europe/Moscow")
+        
+        let preliveTrigger = UNCalendarNotificationTrigger(dateMatching: preliveComponents, repeats: true)
+        let preliveRequest = UNNotificationRequest(identifier: preliveId, content: preliveContent, trigger: preliveTrigger)
+        
+        // 2) 23:00 — начало эфира
+        let liveContent = UNMutableNotificationContent()
+        liveContent.title = "Radio"
+        liveContent.body = "Трансляция начинается"
+        liveContent.sound = .default
+        liveContent.interruptionLevel = .timeSensitive
+        
+        var liveComponents = DateComponents()
+        liveComponents.weekday = 7
+        liveComponents.hour = 23
+        liveComponents.minute = 0
+        liveComponents.timeZone = TimeZone(identifier: "Europe/Moscow")
+        
+        let liveTrigger = UNCalendarNotificationTrigger(dateMatching: liveComponents, repeats: true)
+        let liveRequest = UNNotificationRequest(identifier: liveId, content: liveContent, trigger: liveTrigger)
+        
+        center.add(preliveRequest) { error in
+            if let error { print("Error scheduling prelive notification: \(error)") }
+        }
+        center.add(liveRequest) { error in
+            if let error { print("Error scheduling live notification: \(error)") }
         }
     }
     

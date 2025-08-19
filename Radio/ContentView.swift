@@ -56,11 +56,8 @@ struct ContentView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 300)
                 .labelsHidden()
-                .tint(.blue)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(8)
+                .controlSize(.regular)
                 
                 Spacer()
             }
