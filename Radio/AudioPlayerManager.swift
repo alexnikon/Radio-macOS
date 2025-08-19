@@ -56,7 +56,9 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
     @Published var errorMessage: String?
     @Published var currentStream: StreamType = .wkncHD2
     @Published var currentTrackInfo: TrackInfo = TrackInfo()
+    @Published var volume: Float = 1.0
     
+    private let volumeDefaultsKey = "player.volume"
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var metadataOutput: AVPlayerItemMetadataOutput?
@@ -66,6 +68,11 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
     
     override init() {
         super.init()
+        // Load saved volume if present
+        if UserDefaults.standard.object(forKey: volumeDefaultsKey) != nil {
+            let saved = UserDefaults.standard.float(forKey: volumeDefaultsKey)
+            volume = max(0.0, min(1.0, saved))
+        }
         setupRemoteCommands()
         
         // По умолчанию используем WKNC HD2
@@ -137,6 +144,23 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
         isLoading = true
         errorMessage = nil
         
+        // Для Radio-T проверяем доступность трансляции перед запуском
+        if currentStream == .radioT && player == nil {
+            preflightCheckRadioTLive { [weak self] isLive in
+                guard let self else { return }
+                DispatchQueue.main.async {
+                    if isLive {
+                        self.setupPlayer()
+                    } else {
+                        self.isLoading = false
+                        self.isPlaying = false
+                        self.errorMessage = "Трансляция еще не началась"
+                    }
+                }
+            }
+            return
+        }
+        
         if player == nil {
             setupPlayer()
         } else {
@@ -153,6 +177,32 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
             // Запускаем обновление метаданных при начале воспроизведения
             fetchMetadata()
         }
+    }
+
+    // Быстрый запрос для проверки, идет ли сейчас трансляция Radio-T
+    private func preflightCheckRadioTLive(completion: @escaping (Bool) -> Void) {
+        let url = StreamType.radioT.url
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("bytes=0-1", forHTTPHeaderField: "Range")
+        request.setValue("Radio/1.0 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.timeoutInterval = 4.0
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            // Любая явная ошибка сети трактуем как неактивную трансляцию
+            guard error == nil, let http = response as? HTTPURLResponse else {
+                completion(false)
+                return
+            }
+            // Принимаем 200/206 как признак доступности
+            let okStatus = (200...206).contains(http.statusCode)
+            if okStatus {
+                completion(true)
+                return
+            }
+            completion(false)
+        }
+        task.resume()
     }
     
     func pause() {
@@ -188,6 +238,8 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
                 // Создание плеера
                 let player = AVPlayer(playerItem: playerItem)
                 self.player = player
+                // Применяем текущую громкость к новому плееру
+                self.player?.volume = self.volume
                 
                 // Добавляем наблюдатель состояния
                 self.addPlayerItemObserver(playerItem)
@@ -473,6 +525,14 @@ class AudioPlayerManager: NSObject, ObservableObject, AVPlayerItemMetadataOutput
                 self.updateNowPlayingInfo()
             }
         }
+    }
+    
+    // Установка громкости плеера и сохранение текущего значения
+    func setVolume(_ value: Float) {
+        let clamped = max(0.0, min(1.0, value))
+        volume = clamped
+        player?.volume = clamped
+        UserDefaults.standard.set(clamped, forKey: volumeDefaultsKey)
     }
     
     // Add method to update dock icon badge

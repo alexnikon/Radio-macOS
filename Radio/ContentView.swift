@@ -128,6 +128,36 @@ struct ContentView: View {
                 
                 Spacer()
                 
+                // Сообщение над кнопкой, если трансляция Radio-T еще не началась
+                if let error = player.errorMessage, error == "Трансляция еще не началась" {
+                    Text(error)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 6)
+                }
+
+                // Регулировка громкости
+                HStack(spacing: 8) {
+                    Button(action: { player.setVolume(0.0) }) {
+                        Image(systemName: "speaker.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Mute")
+                    Slider(value: .init(
+                        get: { Double(player.volume) },
+                        set: { player.setVolume(Float($0)) }
+                    ), in: 0...1)
+                    .frame(width: 220)
+                    Button(action: { player.setVolume(1.0) }) {
+                        Image(systemName: "speaker.wave.3.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Max volume")
+                }
+                .padding(.bottom, 8)
+
                 // Кнопка Play/Stop
                 Button(action: {
                     if player.isPlaying {
@@ -179,8 +209,8 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            // Дополнительный контейнер для ошибок с привязкой к верху
-            if let error = player.errorMessage {
+            // Дополнительный контейнер для ошибок (кроме сообщения о старте трансляции)
+            if let error = player.errorMessage, error != "Трансляция еще не началась" {
                 Text(error)
                     .foregroundColor(.red)
                     .font(.system(size: 14))
